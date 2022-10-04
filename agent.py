@@ -25,7 +25,8 @@ class Agent:
         state = [game.next_plat_is_left(), game.next_plat_is_above(), game.next_plat_is_right(),
         game.can_jump(),
         game.going_up(),
-        game.next_plat()]
+        game.is_below()]
+#        print (np.array(state,dtype=int))
         return np.array(state,dtype=int)
 
         
@@ -47,18 +48,18 @@ class Agent:
 
     def get_action(self,state):
         #random move: tradeoff exploration /  explotation
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 100 - self.n_games
         final_move = [0,0,0]
         if random.randint(0,200)<self.epsilon:
             move = random.randint(0,2)
             final_move[move] = 1
-            print("ahora es random")
+
         else:
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
             move = torch.argmax(prediction).item()
             final_move[move] = 1
-            print("ahora no es random")
+
         return final_move
 def train():
     plot_scores = []
