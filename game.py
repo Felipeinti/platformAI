@@ -79,7 +79,7 @@ class JumpGameAI:
         
     def reset(self):
 
-        self.char = Point(self.w // 2 - 50, self.h - 50)
+        self.char = Point(self.w // 2 - 50, self.h - 49)
         self.speed = 0
         self.direction = Direction.NONE
         self.vel_y = 0
@@ -92,7 +92,7 @@ class JumpGameAI:
         self.aux_y = 0
         self.coord = Point(0,0)
         self.distanceplatform = 0
-    
+# estados    
     def danger(self):
         danger=True
         self.coordplatlist = []
@@ -113,41 +113,41 @@ class JumpGameAI:
                 return danger
         
         return danger
-
     def next_plat(self):
         y = self.char.y
         for platform in self.platforms:
-            if y > platform.rect.y and  ( self.vel_y ==0.2 or self.vel_y == 0):
+            if y > platform.rect.y and ( self.vel_y ==0.2 or self.vel_y == 0):
+                print(y, platform.rect.y)
                 self.aux_x = platform.rect.x
                 self.aux_y = platform.rect.y
                 self.distanceplatform = self.char.x - platform.rect.x
+
                 return self.distanceplatform
+
 
         self.distanceplatform = self.char.x - self.aux_x
         return self.distanceplatform
-
     def next_plat_is_right(self):
         if self.distanceplatform <-15:
             return True
         else:
             return False
     def next_plat_is_left(self):
-        if self.distanceplatform > 60:
+        if self.distanceplatform > 65:
+
             return True
         else:
             return False
     def next_plat_is_above(self):
-        if self.distanceplatform <= 60 and self.distanceplatform >= -15:
+        if self.distanceplatform <= 65 and self.distanceplatform >= -15:
             return True
         else:
             return False
-    
     def going_up(self):
         if self.vel_y < 0:
             return True
         else: 
             return False
-
     def can_jump(self):
         if self.vel_y ==0.2 or self.vel_y == 0:
             return True
@@ -159,14 +159,13 @@ class JumpGameAI:
         else:
             return False
 
-
     
         
-        
+#juego
 
     def _place_platform(self):
         self.platforms = pygame.sprite.Group()
-        self.platform = Platform(self.w // 2 - 50, self.h - 50, self.numberplat)
+        self.platform = Platform(self.w // 2 - 70, self.h - 50, self.numberplat)
         self.platforms.add(self.platform) 
 
         
@@ -189,19 +188,36 @@ class JumpGameAI:
     
 
         reward = 0
-        score_before = self.score  #before move
-        #2.move
-        self._move(action)
-
-        score_after = self.score #after move
         if self.next_plat_is_above() and np.array_equal(action,[0,0,1]):
             reward = 8
-        if np.array_equal(action,[1,0,0]) and self.next_plat_is_right():
+        
             if self.going_up():
                 reward = 10
         if np.array_equal(action,[0,1,0]) and self.next_plat_is_left():
             if self.going_up():
                 reward = 10
+        if self.is_below() and not self.going_up():
+            if np.array_equal(action,[1,0,0]) and self.next_plat_is_right():
+                reward = 10
+            if np.array_equal(action,[0,1,0]) and self.next_plat_is_left():
+                reward = 10
+        
+        if not self.can_jump() and np.array_equal(action,[0,0,1]):
+            reward = -10
+        if self.next_plat_is_left() and np.array_equal(action,[1,0,0]):
+            reward = -10
+        if self.next_plat_is_right() and np.array_equal(action,[0,1,0]):
+            reward =-10
+
+
+        #2.move
+        score_before = self.score  #before move
+
+        self._move(action)
+
+
+        score_after = self.score #after move
+
 
         if score_after > score_before:
             reward = 10
@@ -215,7 +231,7 @@ class JumpGameAI:
 
         #3.check if game over
         if self.char.y > self.h or self.frame_iteration > (self.score+1)*500:
-            reward = -10
+            reward = -10   
             game_over = True
 
         #4.place new platform or just move
@@ -232,7 +248,8 @@ class JumpGameAI:
 
         #update ui and clock
         self._update_ui()
-        self.clock.tick(240)
+        self.clock.tick(120)
+
 
         #6.return game over and score
         return reward, game_over, self.score
