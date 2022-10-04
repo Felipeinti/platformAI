@@ -17,12 +17,12 @@ How it works:
 
 Definition of Reinforcement learning:
 Reinforcement learning is an area of machine learning concerned with how software agents ought to take actions
-in an enviroment in order to maximize the notion of cumulative reward.
+in an environment in order to maximize the notion of cumulative reward.
 
 
 
 
-So, our agent here is our computer player (it recieves the reward) and the enviroment would be the game.
+So, our agent here is our computer player (it recieves the reward) and the environment would be the game.
 with the reward we tell the agent how well is doing, and then based on the reward it tries to find the best next action.
 
 
