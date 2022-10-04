@@ -27,7 +27,9 @@ with the reward we tell the agent how well is doing, and then based on the rewar
 
 
 In the code we have :
-  1) The agent:   
+
+
+  	1) The agent:   
 		-game
 		
 		-model   #it must know about both
@@ -48,13 +50,15 @@ In the code we have :
 		
 		-model.train()
 		
-  2) Game(Pygame):   #there is a gameloop
+		
+ 	 2) Game(Pygame):   #there is a gameloop
 		-play_step(action)  #for each gameloop it moves
 		
 		     -> reward,game_over,score #after the move return all these
  
 
-   3) Model (Pytorch):    # feed forward neural network
+
+ 	 3) Model (Pytorch):    # feed forward neural network
 
 		Linear_QNet(DQN)    #it needs to have the new state and the old state
 		
@@ -64,8 +68,11 @@ In the code we have :
 
 
 
--Reward:
+
+-Reward: 
+         
 	 If it moves in the right direction: +10 #more details below
+	 
 	 Gameover:			     -10
 
 -Action: 
@@ -78,17 +85,26 @@ In the code we have :
 	
 
 -State (6 states):
-	state = [game.next_plat_is_left(),    #checks if the next platform is left
+	state =	
+		 
+		 [game.next_plat_is_left(),    #checks if the next platform is left
+		 
 		 game.next_plat_is_above(),   #checks if the next platform is right in top of the character   
+		 
 		 game.next_plat_is_right(),   #checks if the next platform is right
+		 
 		 game.can_jump(), 	      #checks if its touching the ground
+		 
 		 game.going_up(),             #checks if the character is going up
+		 
 		 game.is_below()]	      #checks if it already passed the objective platform
+		 
+		 
 	
 
 
 Model : 
-			         O
+			         
 						 
 	                 O
 			
@@ -113,12 +129,13 @@ Model :
 
 
 Q LEARNING: 
-Q value = Quality of action #we want to improve the decision
 
-0. Init Q value (=init model)
-1. Choose action (model.predict(state))   #sometimes will be a random move
-2. Perform action
-3. Measure reward
-4. Update Q value (+train model)
-5. Repeat to item 1... (loop)
+	Q value = Quality of action #we want to improve the decision
+
+	0. Init Q value (=init model)
+	1. Choose action (model.predict(state))   #sometimes will be a random move
+	2. Perform action
+	3. Measure reward
+	4. Update Q value (+train model)
+	5. Repeat to item 1... (loop)
 
