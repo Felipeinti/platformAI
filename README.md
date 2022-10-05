@@ -71,11 +71,11 @@ In the code we have :
 
 -Reward: 
          
-	 If it moves in the right direction: +10 #more details below
+	 If it moves in the right direction:                 +10 #more details in the state
 	 
-	 Gameover:			     -10
+	 Gameover or it moves in the wrong direction:	     -10
 
--Action: 
+-Action: # The actions that the agent can make.
 
 	[1,0,0]  -> right
 	
@@ -84,7 +84,7 @@ In the code we have :
 	[0,0,1]  -> jump 
 	
 
--State (6 states):
+-State (6 states):  # What does the agent know about its enviroment
 	state =	
 		 
 		 [game.next_plat_is_left(),    #checks if the next platform is left
@@ -103,7 +103,7 @@ In the code we have :
 	
 
 
-Model : 
+Model : # feedforward neuronet 
 			         
 						 
 	                 O
