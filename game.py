@@ -3,6 +3,7 @@ import random
 from enum import Enum
 from collections import namedtuple
 import numpy as np
+import math
 
 
 #reset
@@ -32,11 +33,13 @@ class Direction(Enum):
 
 Point = namedtuple('Point','x,y')
 
-CHAR_SIZE = 20
+CHAR_SIZE = 29
 MAX_PLATFORMS = 10
 aux = 0
 GRAVITY = 0.2
 SCROLL_TRESH = 200
+
+        
 
 
 
@@ -48,13 +51,17 @@ SCROLL_TRESH = 200
 class Platform(pygame.sprite.Sprite):
     def __init__(self,x,y,n):
         super().__init__()
-        self.image = pygame.Surface([70, 10])
-        self.image.fill(WHITE)
+        self.image_platform = pygame.image.load("assets/platform.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image_platform, (70, 20))
+        self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.number = n
     
+    
+
+
     def update(self,scroll):
 
         self.rect.y += scroll
@@ -72,14 +79,20 @@ class JumpGameAI:
         self.h = h
         #init display
         self.display = pygame.display.set_mode((self.w,self.h))
+        self.bg_image = pygame.image.load('assets/bg.jpg').convert_alpha()
         pygame.display.set_caption('Jump')
         self.clock = pygame.time.Clock()
         self.reset()
+        self.animation_loop = 1
+        self.sheet = pygame.image.load("assets/walk.png").convert_alpha()
+        self.flip = False
+        
+        
         
         
     def reset(self):
 
-        self.char = Point(self.w // 2 - 50, self.h - 49)
+        self.char = Point(self.w // 2 - 50, self.h - 80)
         self.speed = 0
         self.direction = Direction.NONE
         self.vel_y = 0
@@ -92,6 +105,7 @@ class JumpGameAI:
         self.aux_y = 0
         self.coord = Point(0,0)
         self.distanceplatform = 0
+
 # estados    
     def danger(self):
         danger=True
@@ -214,6 +228,7 @@ class JumpGameAI:
         score_before = self.score  #before move
 
         self._move(action)
+        
 
 
         score_after = self.score #after move
@@ -248,7 +263,7 @@ class JumpGameAI:
 
         #update ui and clock
         self._update_ui()
-        self.clock.tick(120)
+        self.clock.tick(60)
 
 
         #6.return game over and score
@@ -259,18 +274,40 @@ class JumpGameAI:
 
     def _update_ui(self):
 
-        self.display.fill(BLACK) 
+        
+        self.display.blit(self.bg_image,(0,0))
         
         self.platforms.draw(self.display)
         self.platforms.update(self.scroll)
-
-        pygame.draw.rect(self.display,RED,pygame.Rect(self.char.x,self.char.y,CHAR_SIZE,CHAR_SIZE) )
+        self.display.blit(self._draw(), (self.char.x,self.char.y))
+        #pygame.draw.rect(self.display,RED,pygame.Rect(self.char.x,self.char.y,CHAR_SIZE,CHAR_SIZE) )
         
         text = font_small.render("Score:" + str(self.score), True, WHITE)
         self.display.blit (text,[0,0])
 
         pygame.display.flip()
-    
+
+
+    def get_image(self):
+        self.image = pygame.Surface((29, 29)).convert_alpha()
+        self.image.blit(self.sheet, (0, 0), ((math.floor(self.animation_loop) * 29), 0, 29, 29))
+        self.image = pygame.transform.scale(self.image, (29 * 2, 29 * 2))
+        self.image = pygame.transform.flip(self.image, self.flip, False)
+        self.image.set_colorkey(WHITE)
+
+        return self.image 
+
+    #(self, sheet, frame, width, height, scale)
+    def _draw(self):
+        
+        self.image = self.get_image()
+        self.animation_loop += 0.1
+        if self.animation_loop >= 8:
+            self.animation_loop = 1
+        return self.image
+
+
+
 
     def _move(self, action):
         self.scroll = 0
@@ -280,8 +317,10 @@ class JumpGameAI:
 
         if np.array_equal(action,[1,0,0]):
             new_dir = Direction.RIGHT
+            self.flip = False
         elif np.array_equal(action,[0,1,0]):
             new_dir = Direction.LEFT
+            self.flip = True
         else: #[0,0,1]
             new_dir = Direction.JUMP
 
@@ -303,14 +342,14 @@ class JumpGameAI:
             self.vel_y = -8
 
         for platform in self.platforms:
-            if platform.rect.colliderect(self.char.x,self.char.y + self.vel_y, CHAR_SIZE, CHAR_SIZE):
+            if platform.rect.colliderect((self.char.x +20) ,(self.char.y + self.vel_y + 45), 20,25):
                  #add new score
                 if self.score < platform.number:
                     self.score = platform.number
                  #check if above platform 
                 if self.char.y < platform.rect.centery:
                      if self.vel_y > 0:
-                        y = platform.rect.top - CHAR_SIZE +2
+                        y = platform.rect.top - CHAR_SIZE -25
                         self.vel_y = 0
         if self.vel_y < 5:
             self.vel_y += GRAVITY
