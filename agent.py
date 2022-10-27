@@ -9,7 +9,7 @@ from helper import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
-LR = 0.001
+LR = 0.01
 
 class Agent:
     def __init__(self):
@@ -48,9 +48,9 @@ class Agent:
 
     def get_action(self,state):
         #random move: tradeoff exploration /  explotation
-        self.epsilon = 100 - self.n_games
+        self.epsilon = 50 - self.n_games
         final_move = [0,0,0]
-        if random.randint(0,200)<self.epsilon:
+        if random.randint(0,100)<self.epsilon:
             move = random.randint(0,2)
             final_move[move] = 1
 
@@ -76,7 +76,8 @@ def train():
         final_move = agent.get_action(state_old)
 
         #permorf move and get new state
-        reward, done, score = game.play_step(final_move)
+        reward, done, score = game.play_step(final_move, agent.n_games)
+
         state_new = agent.get_state(game)
 
         #train short memory
