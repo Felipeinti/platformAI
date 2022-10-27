@@ -86,13 +86,14 @@ class JumpGameAI:
         self.animation_loop = 1
         self.sheet = pygame.image.load("assets/walk.png").convert_alpha()
         self.flip = False
+        self.collision = True
         
         
         
         
     def reset(self):
 
-        self.char = Point(self.w // 2 - 50, self.h - 80)
+        self.char = Point(self.w // 2 - 50, self.h - 77)
         self.speed = 0
         self.direction = Direction.NONE
         self.vel_y = 0
@@ -101,7 +102,7 @@ class JumpGameAI:
         self._place_platform()
         self.score = 0
         self.frame_iteration = 0
-        self.aux_x = 0
+        self.aux_x = self.char.x
         self.aux_y = 0
         self.coord = Point(0,0)
         self.distanceplatform = 0
@@ -129,13 +130,13 @@ class JumpGameAI:
         return danger
     def next_plat(self):
         y = self.char.y
+        self.distanceplatform = 0
         for platform in self.platforms:
-            if y > platform.rect.y and ( self.vel_y ==0.2 or self.vel_y == 0):
-                print(y, platform.rect.y)
+            if (y > platform.rect.y) and (self.collision == True):
                 self.aux_x = platform.rect.x
                 self.aux_y = platform.rect.y
                 self.distanceplatform = self.char.x - platform.rect.x
-
+                self.collision = False
                 return self.distanceplatform
 
 
@@ -148,7 +149,6 @@ class JumpGameAI:
             return False
     def next_plat_is_left(self):
         if self.distanceplatform > 65:
-
             return True
         else:
             return False
@@ -188,7 +188,7 @@ class JumpGameAI:
 
 
 
-    def play_step(self,action):
+    def play_step(self,action,games):
         self.next_plat()
         self.frame_iteration += 1
         game_over = False
@@ -249,6 +249,9 @@ class JumpGameAI:
             reward = -10   
             game_over = True
 
+        if self.score > 30 and games < 50:
+            game_over = True
+
         #4.place new platform or just move
 
         if len(self.platforms) < MAX_PLATFORMS:
@@ -263,13 +266,12 @@ class JumpGameAI:
 
         #update ui and clock
         self._update_ui()
-        self.clock.tick(60)
+        self.clock.tick(120)
+
 
 
         #6.return game over and score
         return reward, game_over, self.score
-
-
 
 
     def _update_ui(self):
@@ -342,15 +344,22 @@ class JumpGameAI:
             self.vel_y = -8
 
         for platform in self.platforms:
+
             if platform.rect.colliderect((self.char.x +20) ,(self.char.y + self.vel_y + 45), 20,25):
+                
                  #add new score
                 if self.score < platform.number:
                     self.score = platform.number
                  #check if above platform 
                 if self.char.y < platform.rect.centery:
                      if self.vel_y > 0:
+                        self.collision = True
                         y = platform.rect.top - CHAR_SIZE -25
                         self.vel_y = 0
+        
+        
+        
+        
         if self.vel_y < 5:
             self.vel_y += GRAVITY
 
