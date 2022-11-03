@@ -1,6 +1,6 @@
 # platformAI
 
-Hello to my Reinforcement Learning project.
+Hello to our Reinforcement Learning project.
 
 
 
