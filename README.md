@@ -1,144 +1,70 @@
-# platformAI
+# platformAI: Reinforcement Learning-based Jumping Game
+Demo Video: [platformAI Demo](https://youtu.be/ExOb8yVXUqI)
 
+Welcome to platformAI, our exciting project where we leverage Reinforcement Learning (RL) to teach an AI agent to play a unique jumping game. The game is built from scratch using Pygame and we've implemented a deep learning algorithm using Pytorch to educate our agent.
 
-Demonstration:  https://youtu.be/ExOb8yVXUqI
+## How does it work?
 
-Hello to our Reinforcement Learning project.
+Reinforcement Learning is a subset of machine learning where an agent learns to make decisions by taking certain actions in an environment to maximize a reward. In our scenario, the AI agent (computer player) interacts with the game (environment) and learns from the rewards it receives.
 
+The interaction can be broken down into the following steps:
 
+### 1. The AI Agent
 
-We teach AI to play a jumping game.
+- It first obtains the current state of the game (`state = get_state(game)`)
+- It then determines the next move to make (`action = get_move(game)`)
+    - This decision is made by the agent's model prediction (`model.predict()`)
+- The agent then plays the game with the chosen action (`reward, game_over, score = game.play_step(action)`)
+- The new game state is updated (`new_state = get_state(game)`)
+- The agent then remembers this interaction and trains the model (`model.train()`)
 
-The jumping game is builded by scratch with pygame and then we implement an agent and a deep learning algorithm with pytorch.
+### 2. The Game (Pygame)
 
+- For each game loop, the game makes a move based on the agent's action (`play_step(action)`)
+    - After making the move, the game returns the reward, game over status, and the score
 
+### 3. The Model (Pytorch)
 
+- It's a feed-forward neural network known as Deep Q-Network (DQN) or `Linear_QNet`
+    - The model predicts the next action based on the current state (`model.predict(state)`)
 
+#### Rewarding Mechanism
 
+- If the agent moves in the correct direction, it receives a reward of +10.
+- If the game is over or the agent moves in the wrong direction, the agent is penalized with a reward of -10.
 
-How it works: 
+#### Available Actions
 
-Definition of Reinforcement learning:
-Reinforcement learning is an area of machine learning concerned with how software agents ought to take actions
-in an environment in order to maximize the notion of cumulative reward.
+- Move right: [1,0,0]
+- Move left: [0,1,0]
+- Jump: [0,0,1]
 
+#### State Parameters
 
+The agent observes the game environment based on the following six parameters:
 
+- Whether the next platform is to the left (`game.next_plat_is_left()`)
+- Whether the next platform is directly above (`game.next_plat_is_above()`)
+- Whether the next platform is to the right (`game.next_plat_is_right()`)
+- Whether the agent can jump (`game.can_jump()`)
+- Whether the agent is going up (`game.going_up()`)
+- Whether the agent has already passed the target platform (`game.is_below()`)
 
-So, our agent here is our computer player (it recieves the reward) and the environment would be the game.
-with the reward we tell the agent how well is doing, and then based on the reward it tries to find the best next action.
+#### Model Architecture
 
+Our model is a feed-forward neural network with a hidden layer:
 
-In the code we have :
+STATE (6 units) → [Hidden Layer] (▒) → ACTION (3 units)
 
+#### Q-Learning Process
 
-  	1) The agent:   
-		-game
-		
-		-model   #it must know about both
-		
-	  Training:
-	  
-		-state = get_state(game)   
-		
-		-action = get_move(game):
-		
-		    -model.predict()
-			
-		-reward,game_over, score= game.play_step(action)
-		
-		-new_state = get_state(game)
-		
-		-remember
-		
-		-model.train()
-		
-		
- 	 2) Game(Pygame):   #there is a gameloop
-		-play_step(action)  #for each gameloop it moves
-		
-		     -> reward,game_over,score #after the move return all these
- 
+Q-Learning is an RL algorithm where Q represents the 'Quality of an action'. The main aim is to constantly better the agent's decisions.
 
+Steps in Q-Learning:
 
- 	 3) Model (Pytorch):    # feed forward neural network
-
-		Linear_QNet(DQN)    #it needs to have the new state and the old state
-		
-		- model.predict(state)
-		   ->action
-		  
-
-
-
-
--Reward: 
-         
-	 If it moves in the right direction:                 +10 #more details in the state
-	 
-	 Gameover or it moves in the wrong direction:	     -10
-
--Action: # The actions that the agent can make.
-
-	[1,0,0]  -> right
-	
-	[0,1,0]  -> left
-	
-	[0,0,1]  -> jump 
-	
-
--State (6 states):  # What does the agent know about its enviroment
-	state =	
-		 
-		 [game.next_plat_is_left(),    #checks if the next platform is left
-		 
-		 game.next_plat_is_above(),   #checks if the next platform is right in top of the character   
-		 
-		 game.next_plat_is_right(),   #checks if the next platform is right
-		 
-		 game.can_jump(), 	      #checks if its touching the ground
-		 
-		 game.going_up(),             #checks if the character is going up
-		 
-		 game.is_below()]	      #checks if it already passed the objective platform
-		 
-		 
-	
-
-
-Model : # feedforward neuronet 
-			         
-						 
-	                 O
-			
-              O  -   O
-		
-              O  -   O
-				
-	          O  - 	 O  -	O
-			  
-	STATE ->  O  -	 ▒  -	O  -> ACTION
-	
-	          O  -	 O  -	O
-			  
-	          O  - 	 O
-			  
-                     O
-						 
-                     O
-						 
-	          6 -- hidden---3     
-			  
-
-
-Q LEARNING: 
-
-	Q value = Quality of action #we want to improve the decision
-
-	0. Init Q value (=init model)
-	1. Choose action (model.predict(state))   #sometimes will be a random move
-	2. Perform action
-	3. Measure reward
-	4. Update Q value (+train model)
-	5. Repeat to item 1... (loop)
-
+1. Initialize Q value (same as initializing the model)
+2. Choose an action (`model.predict(state)`) - occasionally, a random move may be chosen
+3. Perform the chosen action
+4. Measure the reward for the action
+5. Update the Q value (train the model with the new data)
+6. Repeat steps 1 to 5 until the agent learns to play the game efficiently.
